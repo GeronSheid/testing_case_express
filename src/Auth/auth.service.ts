@@ -63,3 +63,12 @@ export async function refresh(refreshToken: string): Promise<{ accessToken: stri
   const accessToken = generateAccessToken(payload.userId, user.email, user.role);
   return { accessToken };
 }
+
+export async function logout(refreshToken: string): Promise<void> {
+  const payload = await verifyRefreshToken(refreshToken);
+  if (payload) {
+    await prisma.refreshToken.deleteMany({
+      where: { userId: payload.userId, token: refreshToken },
+    });
+  }
+}

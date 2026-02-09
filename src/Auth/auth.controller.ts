@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
-import { login, refresh, register } from './auth.service';
+import { login, logout, refresh, register } from './auth.service';
+import prisma from '~/db';
 
 export async function registerController(req: Request, res: Response) {
   try {
@@ -85,6 +86,36 @@ export async function refreshController(req: Request, res: Response) {
     if (error instanceof Error) {
       return res.status(400).json({ message: error.message });
     }
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function logoutController(req: Request, res: Response) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      await logout(refreshToken);
+    }
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    return res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to logout" });
+  }
+}
+
+export async function getMeController(req: Request, res: Response) {
+  try {
+    const userId = req.user!.userId;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      omit: { password: true },
+    });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json({ user });
+  } catch (error) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
