@@ -1,5 +1,4 @@
-import express, {type Request, type Response} from "express";
-import { createUser, getAllUsers } from "./User/user.controller";
+import express from "express";
 import userRouter from "./User/user.router";
 import authRouter from "./Auth/auth.router";
 import cookieParser from "cookie-parser";
