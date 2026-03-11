@@ -1,7 +1,8 @@
 import prisma from "~/db";
 import type { User, Prisma } from "../../generated/prisma/client";
+import type { UserSafe } from "./user.models";
 
-async function getAll(): Promise<Omit<User, 'password'>[]> {
+async function getAll(): Promise<UserSafe[]> {
   return await prisma.user.findMany({
     omit: { password: true },
   });
@@ -19,7 +20,7 @@ async function getByEmail(email: string): Promise<User | null> {
   });
 }
 
-async function create(data: Prisma.UserCreateInput): Promise<Omit<User, 'password'>> {
+async function create(data: Prisma.UserCreateInput): Promise<UserSafe> {
   const existingUser = await getByEmail(data.email);
   if (existingUser) {
     throw new Error("User with this email already exists");
@@ -30,7 +31,7 @@ async function create(data: Prisma.UserCreateInput): Promise<Omit<User, 'passwor
   });
 }
 
-async function update(id: number, data: Partial<User>): Promise<Omit<User, 'password'>> {
+async function update(id: number, data: Partial<User>): Promise<UserSafe> {
   return await prisma.user.update({
     where: { id },
     omit: { password: true },
